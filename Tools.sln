@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.VisualScripting.State
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.TestTools.CodeCoverage.Editor", "Unity.TestTools.CodeCoverage.Editor.csproj", "{6DCFF747-4240-35C9-A27F-9C45D74BDCA6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QMVCFramework", "QMVCFramework.csproj", "{C6058381-7BFE-5ACE-6081-CE921B1C2216}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.VisualScripting.State", "Unity.VisualScripting.State.csproj", "{78324E86-D821-5307-33E9-8048C0C15F55}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.TextMeshPro", "Unity.TextMeshPro.csproj", "{E79172E3-6F9F-8339-7E60-65E0B1F13247}"
@@ -129,6 +131,10 @@ Global
 		{6DCFF747-4240-35C9-A27F-9C45D74BDCA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DCFF747-4240-35C9-A27F-9C45D74BDCA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DCFF747-4240-35C9-A27F-9C45D74BDCA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6058381-7BFE-5ACE-6081-CE921B1C2216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6058381-7BFE-5ACE-6081-CE921B1C2216}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6058381-7BFE-5ACE-6081-CE921B1C2216}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6058381-7BFE-5ACE-6081-CE921B1C2216}.Release|Any CPU.Build.0 = Release|Any CPU
 		{78324E86-D821-5307-33E9-8048C0C15F55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{78324E86-D821-5307-33E9-8048C0C15F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78324E86-D821-5307-33E9-8048C0C15F55}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -19,6 +19,4 @@ public class ManualMonoSingleton<T> : MonoBehaviour where T : ManualMonoSingleto
 		if (newInstance == null || instance != null) return;
 		instance = newInstance;
 	}
-
-
 }

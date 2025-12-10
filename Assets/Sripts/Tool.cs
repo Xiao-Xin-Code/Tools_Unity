@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+#define TODO
 using UnityEngine;
 
 public class Tool : MonoBehaviour
@@ -7,10 +6,10 @@ public class Tool : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
-    // Update is called once per frame
+   
     void Update()
     {
         

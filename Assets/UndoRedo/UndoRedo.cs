@@ -1,12 +1,16 @@
-﻿
+﻿using System;
+using UnityEngine;
+
 public class UndoRedo : IUndoRedo
 {
     private Record record;
-    private UndoStack<Record> recordStacks;
+    private UndoStack recordStacks;
 
+
+	
     public UndoRedo(int limit = 20)
     {
-        recordStacks = new UndoStack<Record>(limit);
+        recordStacks = new UndoStack(limit);
     }
 
     public void Undo()
@@ -28,6 +32,7 @@ public class UndoRedo : IUndoRedo
     private void DoUndo()
     {
         Record record = recordStacks.UndoData();
+		Debug.Log(record == null);
         record.Undo();
     }
 
@@ -36,6 +41,12 @@ public class UndoRedo : IUndoRedo
         Record record = recordStacks.RedoData();
         record.Redo();
     }
+
+	public void Clear()
+	{
+		recordStacks.ClearInvalid();
+		recordStacks = new UndoStack(20);
+	}
 
 	public void BeginRecord()
     {
@@ -46,7 +57,7 @@ public class UndoRedo : IUndoRedo
     {
         if (record == null || record.UndoCallBack == null || record.RedoCallBack == null)
         {
-
+			
         }
         else
         {
@@ -58,24 +69,90 @@ public class UndoRedo : IUndoRedo
 
 	#region 预制设置记录方法
 
+	#region Transform层级记录
 
+	public void BeginRecordTransform(Transform target, Transform parent, Action afterUndo = null)
+	{
+		if (record != null)
+		{
+			record.UndoCallBack += record =>
+			{
+				target.SetParent(parent);
+				afterUndo?.Invoke();
+			};
+		}
+	}
 
+	/// <summary>
+	/// 设置清空方法
+	/// </summary>
+	/// <param name="target"></param>
+	public void RecordTransformClear(Transform target, Action afterClear = null)
+	{
+		if (record != null)
+		{
+			record.ClearCallBack += record =>
+			{
+				if (target != null)
+				{
+					GameObject.Destroy(target.gameObject);
+					afterClear?.Invoke();
+				}
+			};
+		}
+	}
+
+	public void EndRecordTransform(Transform target, Transform parent, Action afterRedo = null)
+	{
+		if (record != null)
+		{
+			record.RedoCallBack += record =>
+			{
+				target.SetParent(parent);
+				afterRedo?.Invoke();
+			};
+		}
+	}
 
 	#endregion
 
+	#region 委托记录
+
+	public void BeginRecordAction(Action undoAction)
+	{
+		if (record != null)
+		{
+			record.UndoCallBack += record => undoAction?.Invoke();
+		}
+	}
+
+	public void EndRecordAction(Action redoAction)
+	{
+		if (record != null)
+		{
+			record.RedoCallBack += record => redoAction?.Invoke();
+		}
+	}
+
+    #endregion
+
+    #endregion
 
 
-	#region 工具
 
-	private delegate void UndoRedoCallback(Record record);
+    #region 工具
+
+    private delegate void UndoRedoCallback(Record record);
 
 	private class Record
 	{
 		private UndoRedoCallback m_undoCallback;
 		private UndoRedoCallback m_redoCallback;
+		private UndoRedoCallback m_clearCallback;
 
 		public UndoRedoCallback UndoCallBack { get => m_undoCallback; set => m_undoCallback = value; }
 		public UndoRedoCallback RedoCallBack { get => m_redoCallback; set => m_redoCallback = value; }
+		public UndoRedoCallback ClearCallBack { get => m_clearCallback; set => m_clearCallback = value; }
 
 		public void Undo()
 		{
@@ -101,13 +178,25 @@ public class UndoRedo : IUndoRedo
 			}
 		}
 
+		public void Clear()
+		{
+			try
+			{
+				m_clearCallback?.Invoke(this);
+			}
+			catch
+			{
+
+			}
+		}
+
 	}
 
-	private class UndoStack<T> where T : class
+	private class UndoStack
 	{
-		private class Node
+		public class Node
 		{
-			public T val;
+			public Record val;
 			public Node prev;
 			public Node next;
 
@@ -118,7 +207,7 @@ public class UndoRedo : IUndoRedo
 				this.prev = prev;
 			}
 
-			public Node(T val, Node prev, Node next)
+			public Node(Record val, Node prev, Node next)
 			{
 				this.val = val;
 				this.prev = prev;
@@ -130,6 +219,7 @@ public class UndoRedo : IUndoRedo
 		private Node m_last;//实际结尾
 		private Node m_curmax;
 		private Node m_cur;
+
 
 		public UndoStack(int capacity)
 		{
@@ -149,7 +239,7 @@ public class UndoRedo : IUndoRedo
 			m_curmax = m_head;
 		}
 
-		public void Push(T item)
+		public void Push(Record item)
 		{
 			if (m_cur == m_last)
 			{
@@ -157,9 +247,28 @@ public class UndoRedo : IUndoRedo
 				m_last = m_last.next;
 			}
 
+			ClearInvalid();
+
 			m_cur = m_cur.next;
 			m_cur.val = item;
 			m_curmax = m_cur;
+		}
+
+		public void ClearInvalid()
+		{
+			if (m_curmax != m_cur)
+			{
+				Node temp = m_cur.next;
+				while (temp != m_curmax.next)
+				{
+					if (temp.val != null)
+					{
+						temp.val.Clear();
+					}
+					temp = temp.next;
+					if (temp == m_cur.next) break;
+				}
+			}
 		}
 
 		public bool CanUndo
@@ -186,21 +295,21 @@ public class UndoRedo : IUndoRedo
 			}
 		}
 
-		public T UndoData()
+		public Record UndoData()
 		{
-			T data = m_cur.val;
-			m_cur = m_cur.next;
+			Record data = m_cur.val;
+			m_cur = m_cur.prev;
 			return data;
 		}
 
-		public T RedoData()
+		public Record RedoData()
 		{
 			m_cur = m_cur.next;
-			T data = m_cur.val;
+			Record data = m_cur.val;
 			return data;
 		}
-
 	}
 
 	#endregion
 }
+
