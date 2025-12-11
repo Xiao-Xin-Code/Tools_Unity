@@ -3,32 +3,20 @@ using System.Linq;
 
 public class NestedListEntity : BaseEntity
 {
-	Dictionary<int, BaseNode> categoriesMap = new Dictionary<int, BaseNode>();
+	Dictionary<int, IBaseNode> categoriesMap = new Dictionary<int, IBaseNode>();
 
-	public List<BaseNode> GetCategories => categoriesMap.Values.ToList();
+	public List<IBaseNode> GetCategories => categoriesMap.Values.ToList();
 
-	public void AddCategory(int id, BaseNode category)
+	public void AddCategory(int id, IBaseNode category)
 	{
 		categoriesMap.Add(id, category);
 	}
 
 
+	public IBaseNode GetCateGory(int id)
+	{
+		return categoriesMap[id];
+	}
+
 }
 
-public interface IUniversal
-{
-	int Id { get; set; }
-	string Name { get; set; }
-	int ParentId { get; set; }
-	int Depth { get; set; }
-}
-
-public abstract class BaseNode : IUniversal
-{
-	public int Id { get; set; }
-	public string Name { get; set; }
-	public int ParentId { get; set; }
-	public int Depth { get; set; }
-
-	public bool? IsExpanded { get; set; }
-}

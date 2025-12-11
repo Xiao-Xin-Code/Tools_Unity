@@ -32,6 +32,19 @@ public class PoolSystem : AbstractSystem
 		}
 	}
 
+	public MonoPool<ItemBaseController> GetPool(Type type)
+	{
+		if (pools.ContainsKey(type))
+		{
+			return pools[type];
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+
 	Transform root;
 
 	protected override void OnInit()
