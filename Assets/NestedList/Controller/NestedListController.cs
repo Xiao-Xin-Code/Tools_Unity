@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using QMVC;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class NestedListController : BaseController
 {
@@ -32,9 +33,17 @@ public class NestedListController : BaseController
 
 		_view.RegisterScrollValueChanged(RefreshOnScroll);
 
+		this.RegisterEvent<RefreshNestedListEvent>(OnRefreshNestedListEvent);
+
 		
 	}
 
+
+
+	private void OnRefreshNestedListEvent(RefreshNestedListEvent evt)
+	{
+		Refresh(_entity);
+	}
 
 
     private void Refresh(NestedListEntity entity)
@@ -55,7 +64,7 @@ public class NestedListController : BaseController
 
 				if (node != null) 
 				{
-					if (node.IsExpanded)
+					if (NeedActive(item))
 					{
 						var prefab = _factory.GetPrefab(item.GetType());
 						float targetHeight = curHeight + prefab.RectTransform.rect.height;
@@ -111,8 +120,40 @@ public class NestedListController : BaseController
 			}
 		}
 
+		Debug.Log($"当前最大宽度：{maxWidth}");
 		_view.Scroll.content.sizeDelta = new Vector2(maxWidth, curHeight);
 	}
+
+	private bool NeedActive(IBaseNode baseNode)
+	{
+		Queue<IBaseNode> queue = new Queue<IBaseNode>();
+		queue.Enqueue(baseNode);
+		while (queue.Count > 0)
+		{
+			IBaseNode node = queue.Dequeue();
+
+			if (node.ParentId >= 0)
+			{
+				BaseFolder folder = _entity.GetCateGory<BaseFolder>(node.ParentId);
+
+				if (folder.IsExpanded)
+				{
+					queue.Enqueue(folder);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		return true;
+	}
+
 
 
 	private void RefreshOnScroll(Vector2 v)

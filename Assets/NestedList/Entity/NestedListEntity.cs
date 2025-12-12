@@ -11,7 +11,7 @@ public class NestedListEntity : BaseEntity
 
 	public void AddCategory(int id, IBaseNode category)
 	{
-		Debug.Log("添加ID：" + id + "类型：" + category.GetType());
+		Debug.Log("添加ID：" + id + "ParentID：" + category.ParentId);
 		categoriesMap.Add(id, category);
 	}
 
