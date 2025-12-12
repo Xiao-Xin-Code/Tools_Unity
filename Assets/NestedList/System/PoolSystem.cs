@@ -44,6 +44,31 @@ public class PoolSystem : AbstractSystem
 		}
 	}
 
+	public MonoPool<ItemBaseController> GetPool(Type type, ItemBaseController prefab)
+	{
+		if (pools.ContainsKey(type))
+		{
+			return pools[type];
+		}
+		else
+		{
+			Transform parent = new GameObject(type.FullName).transform;
+			parent.SetParent(root);
+			pools.Add(type, new MonoPool<ItemBaseController>(prefab, parent));
+			return pools[type];
+		}
+	}
+
+
+	public void ReturnAllPool()
+	{
+		foreach (var item in pools.Values)
+		{
+			item.RecycleAll();
+		}
+	}
+
+
 
 	Transform root;
 

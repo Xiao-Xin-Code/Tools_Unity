@@ -5,9 +5,8 @@
 /// </summary>
 public abstract class BaseEntity : IEntity
 {
-    [TODO("获取IArchitecture")]
 	public IArchitecture GetArchitecture()
 	{
-		throw new System.NotImplementedException();
+		return NestedList.Interface;
 	}
 }

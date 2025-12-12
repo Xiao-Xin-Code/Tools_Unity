@@ -16,9 +16,9 @@ public class ItemBaseFactory : IFactory
 	{
 		return type switch
 		{
-			Type t when t == typeof(DefaultNodeFolder)=>Resources.Load<ItemBaseController>(""),
-			Type t when t == typeof(DefaultNodeFile)=>Resources.Load<ItemBaseController>(""),
-			_ => throw new NotImplementedException()
+			Type t when t == typeof(DefaultNodeFolder)=>Resources.Load<ItemBaseController>("Folder"),
+			Type t when t == typeof(DefaultNodeFile)=>Resources.Load<ItemBaseController>("File"),
+			_ => throw new NotImplementedException(type.FullName)
 		};
 	}
 

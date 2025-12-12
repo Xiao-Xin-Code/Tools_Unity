@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using QMVC;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class NestedListController : BaseController
@@ -11,7 +11,7 @@ public class NestedListController : BaseController
 	NestedListView _view;
 	NestedListEntity _entity;
 
-
+	[SerializeField]
 	private string rootPath;
 
 
@@ -24,16 +24,23 @@ public class NestedListController : BaseController
     private void Awake()
     {
 		_poolSystem = this.GetSystem<PoolSystem>();
-
+		_factory = this.GetUtility<ItemBaseFactory>();
 		_entity = new NestedListEntity();
+		_view = GetComponent<NestedListView>();
 
-		Refresh(_entity);
+		StartCoroutine(GetNode());
+
+		_view.RegisterScrollValueChanged(RefreshOnScroll);
+
+		
 	}
 
 
 
     private void Refresh(NestedListEntity entity)
 	{
+		_poolSystem.ReturnAllPool();
+
 		float curHeight = 0;
 		float overHeight = _view.Scroll.content.anchoredPosition.y;
 		float displayHeight = _view.Scroll.content.anchoredPosition.y + _view.Scroll.GetComponent<RectTransform>().rect.height;
@@ -43,43 +50,34 @@ public class NestedListController : BaseController
 		{
 			if (item.ParentId >= 0) 
 			{
-				//存在父节点
-				IBaseNode node = _entity.GetCateGory(item.ParentId);
+				//存在父节点,父节点必须是BaseFolder
+				BaseFolder node = _entity.GetCateGory<BaseFolder>(item.ParentId);
 
 				if (node != null) 
 				{
-					if (node.IsExpanded == null) 
+					if (node.IsExpanded)
 					{
-						throw new Exception("父节点不是容器，此种情况是错误的");
-					}
-					else
-					{
-						if (node.IsExpanded.Value)
+						var prefab = _factory.GetPrefab(item.GetType());
+						float targetHeight = curHeight + prefab.RectTransform.rect.height;
+						float targetWidth = item.Depth * _view.IndentPerLevel + prefab.RectTransform.rect.width;
+
+						if (maxWidth < targetWidth)
 						{
-							var prefab = _factory.GetPrefab(item.GetType());
-							float targetHeight = curHeight + prefab.RectTransform.rect.height;
-							float targetWidth = item.Depth * _view.IndentPerLevel + prefab.RectTransform.rect.width;
-
-							if (maxWidth < targetWidth)
-							{
-								maxWidth = targetWidth;
-							}
-
-
-							if (targetHeight > overHeight && curHeight < displayHeight)
-							{
-								var categoryItem = _poolSystem.GetPool(item.GetType()).Get();
-								categoryItem.transform.SetParent(_view.Scroll.content);
-
-								//设置数据
-
-								float xPos = item.Depth * _view.IndentPerLevel;
-								float yPos = -curHeight;
-								categoryItem.RectTransform.anchoredPosition = new Vector2(xPos, yPos);
-							}
-
-							curHeight = targetHeight;
+							maxWidth = targetWidth;
 						}
+						if (targetHeight > overHeight && curHeight < displayHeight)
+						{
+							var categoryItem = _poolSystem.GetPool(item.GetType(), prefab).Get();
+							categoryItem.transform.SetParent(_view.Scroll.content);
+
+							//设置数据
+							categoryItem.SetEntityData(item);
+
+							float xPos = item.Depth * _view.IndentPerLevel;
+							float yPos = -curHeight;
+							categoryItem.RectTransform.anchoredPosition = new Vector2(xPos, yPos);
+						}
+						curHeight = targetHeight;
 					}
 				}
 				else
@@ -97,22 +95,19 @@ public class NestedListController : BaseController
 				{
 					maxWidth = targetWidth;
 				}
-
 				if (targetHeight > overHeight && curHeight < displayHeight)
 				{
-					var categoryItem = _poolSystem.GetPool(item.GetType()).Get();
+					var categoryItem = _poolSystem.GetPool(item.GetType(),prefab).Get();
 					categoryItem.transform.SetParent(_view.Scroll.content);
 
 					//设置数据
-
+					categoryItem.SetEntityData(item);
 
 					float xPos = item.Depth * _view.IndentPerLevel;
 					float yPos = -curHeight;
 					categoryItem.RectTransform.anchoredPosition = new Vector2(xPos, yPos);
 				}
-
 				curHeight = targetHeight;
-
 			}
 		}
 
@@ -120,11 +115,15 @@ public class NestedListController : BaseController
 	}
 
 
-
-
-	public void GetNode()
+	private void RefreshOnScroll(Vector2 v)
 	{
-		List<string> paths = new List<string>();
+		Refresh(_entity);
+	}
+
+
+
+	IEnumerator GetNode()
+	{
 		int id = 0;
 		Stack<(string FullName, string Name, int Id, int ParentId, int Depth)> stack = new Stack<(string path, string Name, int Id, int ParentId, int Depth)>();
 		DirectoryInfo info = new DirectoryInfo(rootPath);
@@ -133,7 +132,31 @@ public class NestedListController : BaseController
 		while (stack.Count > 0)
 		{
 			var stackInfo = stack.Pop();
-			paths.Add($"[{stackInfo.Id},{stackInfo.ParentId},{stackInfo.Depth}]：{stackInfo.FullName}");
+
+			if (File.Exists(stackInfo.FullName))
+			{
+				_entity.AddCategory(stackInfo.Id, new DefaultNodeFile
+				{
+					Id = stackInfo.Id,
+					ParentId = stackInfo.ParentId,
+					Name = stackInfo.Name,
+					Depth = stackInfo.Depth
+				});
+			}
+			else if (Directory.Exists(stackInfo.FullName))
+			{
+				
+				_entity.AddCategory(stackInfo.Id, new DefaultNodeFolder
+				{
+					Id = stackInfo.Id,
+					ParentId = stackInfo.ParentId,
+					Name = stackInfo.Name,
+					Depth = stackInfo.Depth,
+					IsExpanded = true
+				});
+			}
+
+			yield return null;
 
 			if (Directory.Exists(stackInfo.FullName))
 			{
@@ -154,6 +177,10 @@ public class NestedListController : BaseController
 				}
 			}
 		}
+
+		yield return null;
+
+		Refresh(_entity);
 	}
 	
 }
