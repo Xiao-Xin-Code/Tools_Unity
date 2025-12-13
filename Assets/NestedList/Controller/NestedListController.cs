@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using QMVC;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class NestedListController : BaseController
 {
@@ -118,7 +117,13 @@ public class NestedListController : BaseController
 				}
 				curHeight = targetHeight;
 			}
+			curHeight += _view.Space;
 		}
+		if (_entity.GetCategories.Count > 0)
+		{
+			curHeight -= _view.Space;
+		}
+		
 
 		Debug.Log($"当前最大宽度：{maxWidth}");
 		_view.Scroll.content.sizeDelta = new Vector2(maxWidth, curHeight);
