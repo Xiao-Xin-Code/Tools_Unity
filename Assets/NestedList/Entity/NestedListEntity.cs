@@ -9,6 +9,13 @@ public class NestedListEntity : BaseEntity
 
 	public List<IBaseNode> GetCategories => categoriesMap.Values.ToList();
 
+	/// <summary>
+	/// 激活的，在显示范围可以显示
+	/// </summary>
+	HashSet<int> activeCategories = new HashSet<int>();
+
+
+
 	public void AddCategory(int id, IBaseNode category)
 	{
 		Debug.Log("添加ID：" + id + "ParentID：" + category.ParentId);

@@ -66,7 +66,7 @@ public class NestedListController : BaseController
 					if (NeedActive(item))
 					{
 						var prefab = _factory.GetPrefab(item.GetType());
-						float targetHeight = curHeight + prefab.RectTransform.rect.height;
+						float targetHeight = curHeight + _view.Space + prefab.RectTransform.rect.height;
 						float targetWidth = item.Depth * _view.IndentPerLevel + prefab.RectTransform.rect.width;
 
 						if (maxWidth < targetWidth)
@@ -82,7 +82,7 @@ public class NestedListController : BaseController
 							categoryItem.SetEntityData(item);
 
 							float xPos = item.Depth * _view.IndentPerLevel;
-							float yPos = -curHeight;
+							float yPos = -curHeight - _view.Space;
 							categoryItem.RectTransform.anchoredPosition = new Vector2(xPos, yPos);
 						}
 						curHeight = targetHeight;
@@ -117,18 +117,20 @@ public class NestedListController : BaseController
 				}
 				curHeight = targetHeight;
 			}
-			curHeight += _view.Space;
+			
 		}
-		if (_entity.GetCategories.Count > 0)
-		{
-			curHeight -= _view.Space;
-		}
+		
 		
 
 		Debug.Log($"当前最大宽度：{maxWidth}");
 		_view.Scroll.content.sizeDelta = new Vector2(maxWidth, curHeight);
 	}
 
+	/// <summary>
+	/// 是否激活展开
+	/// </summary>
+	/// <param name="baseNode"></param>
+	/// <returns></returns>
 	private bool NeedActive(IBaseNode baseNode)
 	{
 		Queue<IBaseNode> queue = new Queue<IBaseNode>();
@@ -227,6 +229,31 @@ public class NestedListController : BaseController
 		yield return null;
 
 		Refresh(_entity);
+	}
+
+
+	private void BuildList()
+	{
+		foreach (var item in _entity.GetCategories)
+		{
+			if(item is BaseFolder)
+			{
+				if (((BaseFolder)item).IsExpanded)
+				{
+					
+				}
+			}
+
+			if (item.ParentId >= 0)
+			{
+
+			}
+			else
+			{
+
+			}
+
+		}
 	}
 	
 }

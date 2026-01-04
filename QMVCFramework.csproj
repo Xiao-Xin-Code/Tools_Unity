@@ -60,10 +60,10 @@
     <Analyzer Include="D:\UnityLTS\2022.3.17f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Frame\QMVCFramework.cs" />
     <Compile Include="Assets\Frame\EasyEvent.cs" />
     <Compile Include="Assets\Frame\TypeEventSystem.cs" />
     <Compile Include="Assets\Frame\IOCContainer.cs" />
-    <Compile Include="Assets\Frame\MvcFrame.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Frame\QMVCFramework.asmdef" />

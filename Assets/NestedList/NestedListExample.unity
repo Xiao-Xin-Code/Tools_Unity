@@ -588,7 +588,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71630378d49282f4d8caeb5c1ee6541c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootPath: G:\8.2
+  rootPath: G:\2.2
 --- !u!114 &1274922291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -603,6 +603,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scroll: {fileID: 1274922292}
   indentPerLevel: 20
+  space: 10
 --- !u!114 &1274922292
 MonoBehaviour:
   m_ObjectHideFlags: 0
